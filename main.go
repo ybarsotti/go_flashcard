@@ -122,7 +122,7 @@ func createFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 		}
 
 		if is_created, _ := isCardTermAlreadyCreated(*cards, term); is_created {
-			loggerAcc.OutputToConsole(Red + "This term already exists. Try again:" + Reset)
+			loggerAcc.OutputToConsole("This term already exists. Try again:")
 			continue
 		}
 
@@ -146,7 +146,7 @@ func createFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 		break
 	}
 	*cards = append(*cards, card)
-	loggerAcc.OutputToConsole(Green+"The pair (\"%s\":\"%s\") has been added\n"+Reset, card.Term, card.Definition)
+	loggerAcc.OutputToConsole("The pair (\"%s\":\"%s\") has been added\n", card.Term, card.Definition)
 }
 
 func removeFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
@@ -159,7 +159,7 @@ func removeFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 	for index, card := range *cards {
 		if card.Term == term {
 			*cards = append((*cards)[:index], (*cards)[index+1:]...)
-			loggerAcc.OutputToConsole(Green + "The card has been removed.\n" + Reset)
+			loggerAcc.OutputToConsole("The card has been removed.\n")
 			return
 		}
 	}
@@ -186,7 +186,7 @@ func exportFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 			loggerAcc.OutputToConsole("Error writing line to file %s", err)
 		}
 	}
-	loggerAcc.OutputToConsole(Green+"%d cards have been saved.\n"+Reset, len(*cards))
+	loggerAcc.OutputToConsole("%d cards have been saved.\n", len(*cards))
 }
 
 func importFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
@@ -216,7 +216,7 @@ func importFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 		*cards = append(*cards, *NewCard(term, definition, mistakes_int))
 		loaded_count += 1
 	}
-	loggerAcc.OutputToConsole(Green+"%d cards have been loaded.\n"+Reset, loaded_count)
+	loggerAcc.OutputToConsole("%d cards have been loaded.\n", loaded_count)
 }
 
 
@@ -239,7 +239,7 @@ func askCards(cards *[]Card, loggerAcc *LoggerAcc) {
 
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	for i := 0; i < amount_int; i++ {
-		card_position := r.Intn(len(*cards)-1)
+		card_position := r.Intn(len(*cards))
 		card := (*cards)[card_position]
 		loggerAcc.OutputToConsole("Print the definition of \"%s\":", card.Term)
 		answer, err := loggerAcc.ReadInput()
@@ -249,20 +249,20 @@ func askCards(cards *[]Card, loggerAcc *LoggerAcc) {
 		}
 
 		if card.Definition == answer {
-			loggerAcc.OutputToConsole(Green + "Correct!\n" + Reset)
+			loggerAcc.OutputToConsole("Correct!\n")
 		} else {
 			(*cards)[card_position].IncrementMistake()
 			var is_correct_for_other bool
 			for _, other_card := range *cards {
 				if other_card.Definition == answer {
-					loggerAcc.OutputToConsole(Magenta+"Wrong. The right answer is \"%s\", but your definition is correct for \"%s\".\n"+Reset, card.Definition, other_card.Term)
+					loggerAcc.OutputToConsole("Wrong. The right answer is \"%s\", but your definition is correct for \"%s\".\n", card.Definition, other_card.Term)
 					is_correct_for_other = true
 					break
 				}
 			}
 
 			if !is_correct_for_other {
-				loggerAcc.OutputToConsole(Red+"Wrong. The right answer is \"%s\".\n"+Reset, card.Definition)
+				loggerAcc.OutputToConsole("Wrong. The right answer is \"%s\".\n", card.Definition)
 			}
 		}
 	}
@@ -289,7 +289,7 @@ func saveLogs(loggerAcc *LoggerAcc) {
 		return
 	}
 
-	loggerAcc.OutputToConsole(Green + "The log has been saved." + Reset)
+	loggerAcc.OutputToConsole("The log has been saved.")
 }
 
 func startLoggerBuilder() *strings.Builder {
@@ -323,7 +323,7 @@ func listHardestCards(cards *[]Card, loggerAcc *LoggerAcc) {
 		return
 	} 
 
-	loggerAcc.OutputToConsoleInline("The hardest cards are ")
+	loggerAcc.OutputToConsoleInline("The hardest card is ")
 	
 	for index, term := range termsWithMostMistakes {
 		if index == 0 {
