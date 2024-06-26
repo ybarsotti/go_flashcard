@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -166,12 +167,12 @@ func removeFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 	loggerAcc.OutputToConsole("Can't remove \"%s\": there is no such card.\n", term)
 }
 
-func exportFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
-	loggerAcc.OutputToConsole("File name:")
-	filename, err := loggerAcc.ReadInput()
-	if err != nil {
-		loggerAcc.OutputToConsole("Error reading filename. %s", err)
+func exportFlashCard(cards *[]Card, loggerAcc *LoggerAcc, filename string) {
+	if filename == "" {
+		loggerAcc.OutputToConsole("File name:")
+		filename, _ = loggerAcc.ReadInput()
 	}
+	
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		loggerAcc.OutputToConsole("Error reading file. %s", err)
@@ -189,12 +190,12 @@ func exportFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
 	loggerAcc.OutputToConsole("%d cards have been saved.\n", len(*cards))
 }
 
-func importFlashCard(cards *[]Card, loggerAcc *LoggerAcc) {
-	loggerAcc.OutputToConsole("File name:")
-	filename, err := loggerAcc.ReadInput()
-	if err != nil {
-		loggerAcc.OutputToConsole("Error reading filename. %s", err)
+func importFlashCard(cards *[]Card, loggerAcc *LoggerAcc, filename string) {
+	if filename == "" {
+		loggerAcc.OutputToConsole("File name:")
+		filename, _ = loggerAcc.ReadInput()
 	}
+	
 	file, err := os.Open(filename)
 	if err != nil {
 		loggerAcc.OutputToConsole("File not found.")
@@ -344,8 +345,15 @@ func resetStats(cards *[]Card, loggerAcc *LoggerAcc) {
 }
 
 func main() {
+	importFrom := flag.String("import_from", "", "Which doc start importing")
+	exportTo := flag.String("export_to", "", "Which doc start export at the end")
+	flag.Parse()
 	cards := []Card{}
 	loggerAcc := NewLoggerAcc(startLoggerBuilder(), bufio.NewReader(os.Stdin))
+	
+	if *importFrom != "" {
+		importFlashCard(&cards, loggerAcc, *importFrom)
+	}
 
 promptFor:
 	for {
@@ -356,9 +364,9 @@ promptFor:
 		case "remove":
 			removeFlashCard(&cards, loggerAcc)
 		case "import":
-			importFlashCard(&cards, loggerAcc)
+			importFlashCard(&cards, loggerAcc, "")
 		case "export":
-			exportFlashCard(&cards, loggerAcc)
+			exportFlashCard(&cards, loggerAcc, "")
 		case "ask":
 			askCards(&cards, loggerAcc)
 		case "log":
@@ -368,6 +376,9 @@ promptFor:
 		case "reset stats":
 			resetStats(&cards, loggerAcc)
 		case "exit":
+			if *exportTo != "" {
+				exportFlashCard(&cards, loggerAcc, *exportTo)
+			}
 			loggerAcc.OutputToConsole(Blue + "Bye bye!" + Reset)
 			break promptFor
 		}
